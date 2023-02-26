@@ -15,9 +15,13 @@ is_geometry.default <- function(x) {
 #' @export
 bounding_box <- function(x) UseMethod("bounding_box")
 bounding_box.sfc <- function(x) sf::st_bbox(x)
-bounding_box.rs_MULTIPOLYGON <- function(x) rsgeo::bounding_box(x)
+
 validate_bbox <- function(x) {
-  stopifnot(is.numeric(x), length(x) == 4)
+  stopifnot(
+    is.numeric(x),
+    length(x) == 4,
+    names(x) == c("xmin", "ymin", "xmax", "ymax")
+  )
   x
 }
 
@@ -26,9 +30,15 @@ combine_geometry <- function(x) UseMethod("combine_geometry")
 
 #' @export
 combine_geometry.sfc <- function(x) sf::st_combine(x)
+
 #' @export
 combine_geometry.rs_MULTIPOLYGON <- function(x) rsgeo::combine_geoms(x)
 
+#' @export
+union_geometry <- function(x) UseMethod("union_geometry")
+
+#' @export
+union_geometry.sfc <- function(x) sf::st_union(x)
 
 # helper to find geom column
 which_is_geom_col <- function(x) which(vapply(x, is_geometry, logical(1)))

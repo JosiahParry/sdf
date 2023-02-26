@@ -22,6 +22,12 @@ group_by.sdf <- function(.data, ...) {
 }
 
 #' @export
+ungroup.sdf <- function(.data, ...) {
+  res <- NextMethod()
+  dplyr_reconstruct(res, .data)
+}
+
+#' @export
 summarise.sdf <- function(.data, ...) {
   geom_col_name <- attr(.data, "geom_column")
   geom_col <- .data[[geom_col_name]]

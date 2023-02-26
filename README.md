@@ -7,8 +7,7 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![CRAN
-status](https://www.r-pkg.org/badges/version/sdf)](https://CRAN.R-project.org/package=sdf)
+<!--[![CRAN status](https://www.r-pkg.org/badges/version/sdf)](https://CRAN.R-project.org/package=sdf)-->
 <!-- badges: end -->
 
 The goal of `{sdf}` is to provide an extensible spatial data frame. It
@@ -67,7 +66,7 @@ sdf_rs <- as_sdf(
 
 sdf_rs
 #> Geometry Type: rs_MULTIPOLYGON
-#> Bounding box: x_min: 47680 x_max: 1031401 y_min: 1703258 y_max: 2677441
+#> Bounding box: xmin: 47680 ymin: 1703258 xmax: 1031401 ymax: 2677441
 #> # A tibble: 85 × 27
 #>    code_dept count ave_id…¹  dept region depar…² crime…³ crime…⁴ liter…⁵ donat…⁶
 #>    <fct>     <dbl>    <dbl> <int> <fct>  <fct>     <int>   <int>   <int>   <int>
@@ -85,7 +84,7 @@ sdf_rs
 #> #   main_city <ord>, wealth <int>, commerce <int>, clergy <int>,
 #> #   crime_parents <int>, infanticide <int>, donation_clergy <int>,
 #> #   lottery <int>, desertion <int>, instruction <int>, prostitutes <int>,
-#> #   distance <dbl>, area <int>, pop1831 <dbl>, geometry <MPOLY>, and
+#> #   distance <dbl>, area <int>, pop1831 <dbl>, geometry <MULTIPOLYGON>, and
 #> #   abbreviated variable names ¹​ave_id_geo, ²​department, ³​crime_pers,
 #> #   ⁴​crime_prop, ⁵​literacy, ⁶​donations
 ```
@@ -111,10 +110,10 @@ sdf_rs |>
   group_by(region) |> 
   summarise(total_crime = sum(crime_pers))
 #> Geometry Type: rs_MULTIPOLYGON
-#> Bounding box: x_min: 47680 x_max: 1031401 y_min: 1703258 y_max: 2677441
+#> Bounding box: xmin: 47680 ymin: 1703258 xmax: 1031401 ymax: 2677441
 #> # A tibble: 5 × 3
 #>   region total_crime geometry      
-#>   <fct>        <int> <MPOLY>       
+#>   <fct>        <int> <MULTIPOLYGON>
 #> 1 C           385123 <MultiPolygon>
 #> 2 E           342028 <MultiPolygon>
 #> 3 N           384061 <MultiPolygon>
@@ -124,9 +123,11 @@ sdf_rs |>
 
 ## Required method implementations
 
-As of now presently only 2 generics are required to get basic
-functionality
+The following generics must have an implementation for your geometry
+class. The geometry class must be an S3 object / compatible with a data
+frame.
 
+- `c`
 - `bounding_box()`
 - `combine_geometry()`
 

@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![CRAN status](https://www.r-pkg.org/badges/version/sdf)](https://CRAN.R-project.org/package=sdf)
+<!--[![CRAN status](https://www.r-pkg.org/badges/version/sdf)](https://CRAN.R-project.org/package=sdf)-->
 <!-- badges: end -->
 
 The goal of `{sdf}` is to provide an extensible spatial data frame. It is inspired by Rust traits where if you implement the correct generics, you get a ton of sweet benefits. 
@@ -69,8 +69,10 @@ sdf_rs |>
 
 ## Required method implementations
 
-As of now presently only 2 generics are required to get basic functionality
+The following generics must have an implementation for your geometry class.
+The geometry class must be an S3 object / compatible with a data frame.
 
+- `c` 
 - `bounding_box()`
 - `combine_geometry()`
 
