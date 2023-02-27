@@ -41,16 +41,10 @@ summarise.sdf <- function(.data, ...) {
   as_sdf(res)
 
 }
-#
-# x |>
-#   group_by(region) |>
-#   summarise(total_crime = sum(crime_pers))
-#
-# x |>
-#   mutate(geometry = rsgeo::as_rsgeom(geometry)) |>
-#   group_by(region) |>
-#   summarise(total_crime = sum(crime_pers))
-#
-#
-#
-#
+
+#' @importFrom dplyr dplyr_reconstruct
+#' @export
+dplyr_reconstruct.sdf <- function(data, template) {
+  res <- NextMethod()
+  as_sdf(res)
+}

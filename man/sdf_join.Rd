@@ -4,7 +4,7 @@
 \alias{sdf_join}
 \title{Left join only}
 \usage{
-sdf_join(x, y, predicate, ..., suffix = c("_x", "_y"))
+sdf_join(x, y, predicate = sdf_intersects, ..., suffix = c("_x", "_y"))
 }
 \arguments{
 \item{predicate}{a function that returns a sparse matrix list representation}

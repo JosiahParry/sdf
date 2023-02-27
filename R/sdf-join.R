@@ -1,14 +1,15 @@
-#' Geometry Accessor
-#' @export
-sdf_geometry <- function(x) {
-  x[[attr(x, "geom_column")]]
-}
 
 #' Left join only
 #' @param predicate a function that returns a sparse matrix list representation
 #'
 #' @export
-sdf_join <- function(x, y, predicate, ..., suffix = c("_x", "_y")) {
+sdf_join <- function(
+    x,
+    y,
+    predicate = sdf_intersects,
+    ...,
+    suffix = c("_x", "_y")
+) {
 
   x_geo_col <- which_is_geom_col(x)
   y_geo_col <- which_is_geom_col(y)
@@ -62,7 +63,7 @@ sdf_join <- function(x, y, predicate, ..., suffix = c("_x", "_y")) {
 
 
 #' @export
-sdf_filter <- function(x, y, predicate) {
+sdf_filter <- function(x, y, predicate = sdf_intersects) {
   x_geo <- sdf_geometry(x)
   y_geo <- sdf_geometry(y)
   indices <- predicate(x_geo, y_geo)
