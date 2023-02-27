@@ -6,7 +6,10 @@ format.sdf <- function(x, ...) {
   bbox <- attr(x, "bbox")
 
   geom_type <- paste0("Geometry Type: ", class(x[[geom_col]])[1])
-  bbox_str <- paste0("Bounding box: ", paste(names(bbox), bbox, collapse = " ", sep = ": "))
+  bbox_str <- paste0(
+    "Bounding box: ",
+    paste(names(bbox), round(bbox, 3), collapse = " ", sep = ": ")
+  )
 
   c(
     "geom" = geom_type,

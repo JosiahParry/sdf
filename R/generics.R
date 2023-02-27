@@ -1,5 +1,17 @@
+
+# Required generics -------------------------------------------------------
+
+#' @export
+bounding_box <- function(x) UseMethod("bounding_box")
+
+#' @export
+is_geometry <- function(x) UseMethod("is_geometry")
+
 #' @export
 combine_geometry <- function(x) UseMethod("combine_geometry")
+
+
+# Optional generics -------------------------------------------------------
 
 #' @export
 union_geometry <- function(x) UseMethod("union_geometry")
@@ -9,12 +21,6 @@ simplify_geometry <- function(x, ...) UseMethod("simplify_geometry")
 
 #' @export
 buffer_geometry <- function(x, distance, ...) UseMethod("buffer_geometry")
-
-#' @export
-bounding_box <- function(x) UseMethod("bounding_box")
-
-#' @export
-is_geometry <- function(x) UseMethod("is_geometry")
 
 #' @export
 centroid <- function(x) UseMethod("centroid")

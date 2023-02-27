@@ -20,9 +20,12 @@ knitr::opts_chunk$set(
 <!--[![CRAN status](https://www.r-pkg.org/badges/version/sdf)](https://CRAN.R-project.org/package=sdf)-->
 <!-- badges: end -->
 
-The goal of `{sdf}` is to provide an extensible spatial data frame. It is inspired by Rust traits where if you implement the correct generics, you get a ton of sweet benefits. 
+The goal of `{sdf}` is to provide an extensible spatial data frame. sdf acts as a common interface to a variety of different geometry types. sdf is inspired in part by dplyr where the dplyr syntax acts as an interface that can be utilized by a number of different of data sources without changing the syntax—e.g. dbplyr, sparklyr, dtplyr, among others. 
 
-By implementing the required generics your geometry type can become an `sdf` (spatial data frame).
+
+It is inspired by Rust traits where if you implement the correct generics, you get a ton of sweet benefits. By implementing the required generics your geometry type can become an `sdf` (spatial data frame).
+
+If you don't know what is meant by "generic" [start here](https://adv-r.hadley.nz/s3.html).
 
 ## Installation
 
@@ -37,15 +40,18 @@ remotes::install_github("josiahparry/sdf")
 ```{r}
 library(sdf)
 
+# pull some spatial data
 data(guerry, package = "sfdep")
+g <- dplyr::select(guerry, code_dept, crime_pers, region)
 
-# using sf
+# using sf, cast to a spatial data frame
 sdf_sf <- as_sdf(guerry)
 
 sdf_sf
 
 # using rust
 sdf_rs <- as_sdf(
+  # convert geometry to rust geometry
   dplyr::mutate(guerry, geometry = rsgeo::as_rsgeom(geometry))
 )
 
@@ -73,9 +79,105 @@ The following generics must have an implementation for your geometry class.
 The geometry class must be an S3 object / compatible with a data frame.
 
 - `c` 
+- `is_geometry()`
 - `bounding_box()`
 - `combine_geometry()`
 
-... 
+Implementing these generics provides access to dplyr functionality only. 
 
-additional generics will be added here
+## Spatial joins and filters
+
+The functions `sdf_join()` and `sdf_filter()` have an argument `predicate` which takes a predicate function—by default `sdf_intersects()`. For two spatial data frames `x` and `y` the predicate must return a list with the same length as `x`. Each element must be a list of integer vectors where each element indicates the corresponding elements in `y` where the predicate function is true. 
+
+The following predicate generic functions are exported `sdf_intersects()`, `sdf_contains()`, `sdf_within()`, and `sdf_crosses()`. It is recommended that you implement these generics, though not mandatory. Any function that returns a sparse matrix as described above for two geometry columns can be used.
+
+## Other generics 
+
+- `union_geometry()`
+- `simplify_geometry()`
+- `buffer_geometry()`
+- `centroid()`
+- `convex_hull()`
+- `concave_hull()`
+
+## Implementing `{geos}` generics
+
+
+```{r}
+library(geos)
+geo <-  as_geos_geometry(guerry$geometry)
+```
+
+The first step is to define the `is_geometry()` generic which must return `TRUE` for your geometry class. 
+
+```{r}
+is_geometry.geos_geometry <- function(x) inherits(x, "geos_geometry")
+
+is_geometry(geo)
+```
+
+Next, we need to implement the bounding box generic. There is not any bounding box function in geos that I am aware of so we have to implement our own. The `bounding_box()` generic _must_ return a numeric vector of length 4 with the names `xmin`, `ymin`, `xmax`, and `ymax` in that order. The bounding box is checked with the internal function `validate_bbox()`.
+
+```{r}
+bounding_box.geos_geometry <- function(x) {
+  extents <- geos::geos_extent(x)
+  apply(extents, 2, min)
+}
+
+bounding_box(geo)
+```
+
+For minimal functionality, we need to lastly provide a `combine_geometry()` method. This is used in the `summarise()` function. 
+
+```{r}
+combine_geometry.geos_geometry <- function(x) {
+  geos::geos_make_collection(x)
+}
+
+combine_geometry(geo)
+```
+
+Now we can create an sdf object with only this alone.
+
+```{r}
+library(sf)
+library(dplyr)
+
+geosdf <- as_tibble(guerry) |> 
+  mutate(geometry = as_geos_geometry(geometry)) |> 
+  as_sdf()
+
+geosdf
+```
+
+Only those three methods we can now use dplyr functionality. 
+
+```{r}
+geosdf |> 
+  group_by(code_dept) |> 
+  summarise(total_crime = sum(crime_pers))
+```
+
+This alone is super useful! But we may also want to be able to implement spatial joins and filters. To do this we need to implement some predicate functions methods. In this case we will create only the method for `sdf_intersects()`. 
+
+The below function creates a GEOS STRTree which is a type of search tree that makes speeds up join candidate searches. Then we use the tree to actually find the intersecting neighbors.
+
+```{r}
+sdf_intersects.geos_geometry <- function(x, y, ...) {
+  rtree <- geos::geos_strtree(y)
+  geos::geos_intersects_matrix(x, rtree)
+}
+```
+
+To use this function let's sample 25 random points from the originally sf geometry and join on the region data to it. 
+
+```{r}
+pnt_sample <- sf::st_sample(guerry, 25)
+
+pnts <- as_sdf(
+  list(geometry = as_geos_geometry(pnt_sample))
+)
+
+sdf_join(pnts, geosdf)
+```
+

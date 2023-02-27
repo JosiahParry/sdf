@@ -22,19 +22,19 @@ sdf_crosses.sfc <- function(x, y, ...) sf::st_crosses(x, y, ...)
 
 
 # geos compat -------------------------------------------------------------
-
-sdf_intersects.geos_geometry <- function(x, y, ...) {
-  rtree <- geos::geos_strtree(x)
-  geos::geos_intersects_matrix(y, rtree)
-}
-
-sdf_contains.geos_geometry <- function(x, y, ...) {
-  rtree <- geos::geos_strtree(x)
-  geos::geos_contains_matrix(y, rtree)
-}
-
-sdf_within.geos_geometry <- function(x, y, ...) {
-  rtree <- geos::geos_strtree(x)
-  geos::geos_within_matrix(y, rtree)
-}
-
+#
+# sdf_intersects.geos_geometry <- function(x, y, ...) {
+#   rtree <- geos::geos_strtree(x)
+#   geos::geos_intersects_matrix(y, rtree)
+# }
+#
+# sdf_contains.geos_geometry <- function(x, y, ...) {
+#   rtree <- geos::geos_strtree(x)
+#   geos::geos_contains_matrix(y, rtree)
+# }
+#
+# sdf_within.geos_geometry <- function(x, y, ...) {
+#   rtree <- geos::geos_strtree(x)
+#   geos::geos_within_matrix(y, rtree)
+# }
+#

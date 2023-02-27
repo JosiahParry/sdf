@@ -21,7 +21,7 @@ sdf_join <- function(
   y_names <- rlang::names2(y)[-y_geo_col]
 
   # identify common names and specify names with suffix
-  common_names <- union(x_names, y_names)
+  common_names <- intersect(x_names, y_names)
   bad_x <- which(x_names %in% common_names)
   bad_y <- which(y_names %in% common_names)
   x_names[bad_x] <- paste0(x_names[bad_x], suffix[1])
@@ -31,7 +31,7 @@ sdf_join <- function(
   join_indices <- predicate(x_geo, y_geo)
 
   ids_raw <- mapply(
-    \(id, n) {
+    function(id, n) {
       if (n == 0) {
         yid <- NA
       } else {
@@ -41,7 +41,7 @@ sdf_join <- function(
       },
     seq_along(join_indices),
     lengths(join_indices),
-    SIMPLIFY = "matrix"
+    SIMPLIFY = FALSE
   )
 
   # make into a single matrix
@@ -50,13 +50,16 @@ sdf_join <- function(
   xids <- ids[,1]
   yids <- ids[,2]
 
-  x_res <- rlang::set_names(x[xids,], x_names)
+  x_res <- rlang::set_names(
+    tibble::as_tibble(x)[xids, -x_geo_col], x_names
+    )
+
   y_res <- rlang::set_names(
     tibble::as_tibble(y)[yids, -y_geo_col],
     y_names
     )
 
-  as_sdf(vctrs::vec_cbind(x_res, y_res))
+  as_sdf(cbind(x_res, y_res, x[xids,]))
 
 }
 
