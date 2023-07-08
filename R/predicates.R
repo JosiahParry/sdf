@@ -14,27 +14,21 @@ sdf_within <- function(x, y, ...) UseMethod("sdf_within")
 #' @export
 sdf_crosses <- function(x, y, ...) UseMethod("sdf_crosses")
 
-# sf compat ---------------------------------------------------------------
-sdf_intersects.sfc <- function(x, y, ...) sf::st_intersects(x, y, ...)
-sdf_contains.sfc <- function(x, y, ...) sf::st_contains(x, y, ...)
-sdf_within.sfc <- function(x, y, ...) sf::st_within(x, y, ...)
-sdf_crosses.sfc <- function(x, y, ...) sf::st_crosses(x, y, ...)
+#' @export
+sdf_covers <- function(x, y, ...) UseMethod("sdf_covers")
 
+#' @export
+sdf_covered_by <- function(x, y, ...) UseMethod("sdf_covered_by")
 
-# geos compat -------------------------------------------------------------
-#
-# sdf_intersects.geos_geometry <- function(x, y, ...) {
-#   rtree <- geos::geos_strtree(x)
-#   geos::geos_intersects_matrix(y, rtree)
-# }
-#
-# sdf_contains.geos_geometry <- function(x, y, ...) {
-#   rtree <- geos::geos_strtree(x)
-#   geos::geos_contains_matrix(y, rtree)
-# }
-#
-# sdf_within.geos_geometry <- function(x, y, ...) {
-#   rtree <- geos::geos_strtree(x)
-#   geos::geos_within_matrix(y, rtree)
-# }
-#
+#' @export
+sdf_equals <- function(x, y, ...) UseMethod("sdf_equals")
+
+#' @export
+sdf_disjoint <- function(x, y, ...) UseMethod("sdf_disjoint")
+
+#' @export
+sdf_touches <- function(x, y, ...) UseMethod("sdf_touches")
+
+#' @export
+sdf_overlaps <- function(x, y, ...) UseMethod("sdf_overlaps")
+
