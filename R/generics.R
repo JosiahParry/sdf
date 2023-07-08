@@ -8,6 +8,7 @@
 #' @export
 bounding_box <- function(x) UseMethod("bounding_box")
 
+#' @export
 bounding_box.default <- function(x) {
   wk::wk_bbox(x)
 }
@@ -15,6 +16,7 @@ bounding_box.default <- function(x) {
 #' @export
 is_geometry <- function(x) UseMethod("is_geometry")
 
+#' @export
 is_geometry.default <- function(x) {
   vctrs::vec_is(x) && wk::is_handleable(x)
 }
@@ -23,7 +25,9 @@ is_geometry.default <- function(x) {
 combine_geometry <- function(x) UseMethod("combine_geometry")
 
 
-# Optional generics -------------------------------------------------------
+
+# Main interface ----------------------------------------------------------
+# These are the minimum suggested, but still optional, generics to implement
 
 #' @export
 union_geometry <- function(x) UseMethod("union_geometry")
@@ -44,9 +48,19 @@ convex_hull <- function(x) UseMethod("convex_hull")
 concave_hull <- function(x, concavity, ...) UseMethod("concave_hull")
 
 
-# -------------------------------------------------------------------------
 
-# lenght
+# Additional utilities ----------------------------------------------------
+# these are optional generics to implement that are very common and could be
+# useful to implement. But less important than the main interface.
+
+#' @export
+sdf_length <- function(x, ...) UseMethod("sdf_length")
+
+#' @export
+sdf_area <- function(x, ...) UseMethod("sdf_area")
+
+# possible others to implement:
+
 # is empty
 # is_valid
 # is within distance

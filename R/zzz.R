@@ -5,3 +5,4 @@
   vctrs::s3_register("dplyr::summarise", "sdf")
   vctrs::s3_register("dplyr::dplyr_reconstruct", "sdf")
 }
+

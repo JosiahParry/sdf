@@ -1,3 +1,4 @@
+
 bounding_box.geos_geometry <- function(x) {
   geos::as_geos_geometry(wk::wk_bbox(geo))
 }
