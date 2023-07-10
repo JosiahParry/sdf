@@ -11,7 +11,7 @@ is_geometry.{{class_name}} <- function(x) {
 }
 
 
-# If you class implements a wk handler, the default method will work.
+# If your class implements a wk handler, the default method will work.
 #' @export
 bounding_box.{{class_name}} <- function(x) {
   # TODO

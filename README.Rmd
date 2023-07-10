@@ -149,7 +149,30 @@ There are a number of other generics that are exports. The following generics ar
 - `convex_hull()`
 - `concave_hull()`
 
-## Implementing `{geos}` generics
+## Implementing your geometry class
+
+`sdf` provides templates for you to implement your own geometry class. There are two components:
+
+1. writing the methods for your class and
+2. registering your method with `sdf`.
+
+To this end there are two templates for you. `use_sdf_template_class()` will open a new R script with the scaffolding needed to implement your geometry class. 
+
+The first 30 lines of the template are below to illustrate what the template looks like:
+
+```{r, echo = FALSE}
+cat(readLines(system.file("templates/new-class-compat.R", package = "sdf"))[1:30], sep = "\n")
+```
+Secondly the function `use_sdf_template_zzz()` will create the required `.onLoad()` function call in a `zzz.R` file for you to register your methods and class. 
+
+The first 15 lines are below for an example.
+
+```{r, echo = FALSE}
+cat(readLines(system.file("templates/zzz.R", package = "sdf"))[1:15], sep = "\n")
+```
+
+
+### Implementing `{geos}` generics
 
 While there already is a geos implementation, it is worth walking through how to do so. 
 
