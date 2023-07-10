@@ -36,6 +36,8 @@ remotes::install_github("josiahparry/sdf")
 The `sdf` generics have been implemented for the `sf`, `geos`, and `s2`
 packages. `sdf` will work with those three packages out of the box.
 
+First lets grab an sf object to try converting from.
+
 ``` r
 library(sf) # so sf methods work
 #> Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
@@ -44,7 +46,11 @@ library(sdf)
 # pull some spatial data
 data(guerry, package = "sfdep")
 g <- dplyr::select(guerry, code_dept, crime_pers, region)
+```
 
+We can then cast the sf object to a spatial data frame.
+
+``` r
 # using sf, cast to a spatial data frame
 sdf_sf <- as_sdf(g)
 
@@ -66,7 +72,11 @@ sdf_sf
 #>  9 10             19602 E      (((775400 2345600, 775068 2345397, 773587 234517…
 #> 10 11             15647 S      (((626230 1810121, 626269 1810496, 627494 181132…
 #> # ℹ 75 more rows
+```
 
+And the same thing goes for geos.
+
+``` r
 # using geos
 sdf_geos <- as_sdf(
   # convert geometry to rust geometry
@@ -92,6 +102,9 @@ sdf_geos
 #> 10 11             15647 S      <MULTIPOLYGON [547293 1738382...673587 1828670]>
 #> # ℹ 75 more rows
 ```
+
+The spatial data frame is compatible with dplyr out of the box and it
+doesn’t care about your geometry class.
 
 ``` r
 library(dplyr, warn.conflicts = FALSE)
@@ -364,20 +377,20 @@ sdf_join(pnts, geosdf)
 #> Spatial Data Frame
 #> Geometry Type: geos_geometry
 #> Bounding box: xmin: NA ymin: NA xmax: NA ymax: NA
-#> # A tibble: 93 × 27
-#>    code_dept count ave_id_geo  dept region department      crime_pers crime_prop
-#>    <fct>     <dbl>      <dbl> <int> <fct>  <fct>                <int>      <int>
-#>  1 11            1       2807    11 S      Aude                 15647      10431
-#>  2 17            1       5205    17 W      Charente-Infer…      18712       5357
-#>  3 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
-#>  4 26            1       8370    26 E      Drome                13396       7759
-#>  5 22            1      33634    22 W      Cotes-du-Nord        28607       7050
-#>  6 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
-#>  7 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
-#>  8 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
-#>  9 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
-#> 10 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
-#> # ℹ 83 more rows
+#> # A tibble: 89 × 27
+#>    code_dept count ave_id_geo  dept region department crime_pers crime_prop
+#>    <fct>     <dbl>      <dbl> <int> <fct>  <fct>           <int>      <int>
+#>  1 <NA>         NA         NA    NA <NA>   <NA>               NA         NA
+#>  2 <NA>         NA         NA    NA <NA>   <NA>               NA         NA
+#>  3 <NA>         NA         NA    NA <NA>   <NA>               NA         NA
+#>  4 21            1       6174    21 E      Cote-d'Or       32256       9159
+#>  5 <NA>         NA         NA    NA <NA>   <NA>               NA         NA
+#>  6 <NA>         NA         NA    NA <NA>   <NA>               NA         NA
+#>  7 09            1       2526     9 S      Ariege           6173       9597
+#>  8 <NA>         NA         NA    NA <NA>   <NA>               NA         NA
+#>  9 <NA>         NA         NA    NA <NA>   <NA>               NA         NA
+#> 10 <NA>         NA         NA    NA <NA>   <NA>               NA         NA
+#> # ℹ 79 more rows
 #> # ℹ 19 more variables: literacy <int>, donations <int>, infants <int>,
 #> #   suicides <int>, main_city <ord>, wealth <int>, commerce <int>,
 #> #   clergy <int>, crime_parents <int>, infanticide <int>,

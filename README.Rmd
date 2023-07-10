@@ -38,6 +38,9 @@ remotes::install_github("josiahparry/sdf")
 
 The `sdf` generics have been implemented for the `sf`, `geos`, and `s2` packages. `sdf` will work with those three packages out of the box.
 
+
+First lets grab an sf object to try converting from. 
+
 ```{r}
 library(sf) # so sf methods work
 library(sdf)
@@ -45,12 +48,21 @@ library(sdf)
 # pull some spatial data
 data(guerry, package = "sfdep")
 g <- dplyr::select(guerry, code_dept, crime_pers, region)
+```
 
+We can then cast the sf object to a spatial data frame. 
+
+```{r}
 # using sf, cast to a spatial data frame
 sdf_sf <- as_sdf(g)
 
 sdf_sf
+```
 
+
+And the same thing goes for geos. 
+
+```{r}
 # using geos
 sdf_geos <- as_sdf(
   # convert geometry to rust geometry
@@ -60,6 +72,7 @@ sdf_geos <- as_sdf(
 sdf_geos
 ```
 
+The spatial data frame is compatible with dplyr out of the box and it doesn't care about your geometry class. 
 
 ```{r}
 library(dplyr, warn.conflicts = FALSE)
