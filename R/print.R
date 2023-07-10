@@ -12,6 +12,7 @@ format.sdf <- function(x, ...) {
   )
 
   c(
+    "header" = "Spatial Data Frame",
     "geom" = geom_type,
     "bbox" =  bbox_str,
     NextMethod()

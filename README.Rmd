@@ -22,7 +22,6 @@ knitr::opts_chunk$set(
 
 The goal of `{sdf}` is to provide an extensible spatial data frame. sdf acts as a common interface to a variety of different geometry types. sdf is inspired in part by dplyr where the dplyr syntax acts as an interface that can be utilized by a number of different of data sources without changing the syntax—e.g. dbplyr, sparklyr, dtplyr, among others. 
 
-
 It is inspired by Rust traits where if you implement the correct generics, you get a ton of sweet benefits. By implementing the required generics your geometry type can become an `sdf` (spatial data frame).
 
 If you don't know what is meant by "generic" [start here](https://adv-r.hadley.nz/s3.html).
@@ -37,7 +36,10 @@ remotes::install_github("josiahparry/sdf")
 
 ## Example
 
+The `sdf` generics have been implemented for the `sf`, `geos`, and `s2` packages. `sdf` will work with those three packages out of the box.
+
 ```{r}
+library(sf) # so sf methods work
 library(sdf)
 
 # pull some spatial data
@@ -45,17 +47,17 @@ data(guerry, package = "sfdep")
 g <- dplyr::select(guerry, code_dept, crime_pers, region)
 
 # using sf, cast to a spatial data frame
-sdf_sf <- as_sdf(guerry)
+sdf_sf <- as_sdf(g)
 
 sdf_sf
 
-# using rust
-sdf_rs <- as_sdf(
+# using geos
+sdf_geos <- as_sdf(
   # convert geometry to rust geometry
-  dplyr::mutate(guerry, geometry = rsgeo::as_rsgeom(geometry))
+  dplyr::mutate(g, geometry = geos::as_geos_geometry(geometry))
 )
 
-sdf_rs
+sdf_geos
 ```
 
 
@@ -66,11 +68,20 @@ sdf_sf |>
   group_by(region) |> 
   summarise(total_crime = sum(crime_pers))
 
-sdf_rs |> 
+sdf_geos |> 
   group_by(region) |> 
   summarise(total_crime = sum(crime_pers))
 ```
 
+## Philosophy
+
+There are a number of different geometry types among low-level libraries. Geometry types should be interchangeable and the type you use should not be dictated by the libraries you use. All geometries should be able to convert to and from one another. Some libraries have better performance, accuracy, or algorithms that can and should be used when appropriate. 
+
+Geospatial and data science more broadly are quickly moving towards a unified memory format à la arrow. Being able to represent our geometries in a common memory format enables us to convert to and from anything. Today, in R, that approach is handled by `{wk}`. In the future, this will be `{geoarrow}`. 
+
+This package is intended to serve as an example of what a spatial data frame of the future might look like. The geometry column is independent of the R package itself. All that is required is a number of s3 generic functions to be implemented. 
+
+This is how I hope to see the `{sf}` package. I want to see it as an enabler of a variety of geometry backends some of which may even be lazily evaluated (such as a PostGIS backend).
 
 
 ## Required method implementations
@@ -78,20 +89,45 @@ sdf_rs |>
 The following generics must have an implementation for your geometry class.
 The geometry class must be an S3 object / compatible with a data frame.
 
-- `c` 
+- `c()` 
 - `is_geometry()`
 - `bounding_box()`
 - `combine_geometry()`
 
 Implementing these generics provides access to dplyr functionality only. 
 
+### Default implementations 
+
+Since the `wk` package acts as a middle-man between memory formats, we can use it for default implementations. Any object which is identified as a vector by `vctrs` and is handleable by `wk` will be minimally functional.
+
+- `is_geometry(x)` has a default implementation which ensures that `x` is a vector and is useable by `wk` via `vctrs::vec_is()` and `wk::is_handleable()`. 
+
+- `bounding_box()` has default implementation of `wk::wk_bbox()`
+
+- `combine_geometry()` has a default implementation of `wk::wk_collection()`
+
 ## Spatial joins and filters
 
 The functions `sdf_join()` and `sdf_filter()` have an argument `predicate` which takes a predicate function—by default `sdf_intersects()`. For two spatial data frames `x` and `y` the predicate must return a list with the same length as `x`. Each element must be a list of integer vectors where each element indicates the corresponding elements in `y` where the predicate function is true. 
 
-The following predicate generic functions are exported `sdf_intersects()`, `sdf_contains()`, `sdf_within()`, and `sdf_crosses()`. It is recommended that you implement these generics, though not mandatory. Any function that returns a sparse matrix as described above for two geometry columns can be used.
+The following predicate generic functions are exported:
+
+- `sdf_intersects()`
+- `sdf_contains()`
+- `sdf_within()`
+- `sdf_crosses()` 
+- `sdf_covers()`
+- `sdf_covered_by()`
+- `sdf_equals()`
+- `sdf_disjoint()`
+- `sdf_touches()`
+- `sdf_overlaps()`
+
+It is recommended that you implement a few of generics, though not mandatory. Any function that returns a sparse matrix as described above for two geometry columns can be used in `sdf_join()` and `sdf_filter()`
 
 ## Other generics 
+
+There are a number of other generics that are exports. The following generics are considered to be part of the "main" interface. These are the functions that are strongly recommended to implement for your geometry vector class. 
 
 - `union_geometry()`
 - `simplify_geometry()`
@@ -102,6 +138,7 @@ The following predicate generic functions are exported `sdf_intersects()`, `sdf_
 
 ## Implementing `{geos}` generics
 
+While there already is a geos implementation, it is worth walking through how to do so. 
 
 ```{r}
 library(geos)
@@ -127,7 +164,7 @@ bounding_box.geos_geometry <- function(x) {
 bounding_box(geo)
 ```
 
-For minimal functionality, we need to lastly provide a `combine_geometry()` method. This is used in the `summarise()` function. 
+For minimal functionality, we need to lastly provide a `combine_geometry()` method. This is used in the `summarise()` function. `combine_geometry()` is intended to combine single geometries into the multi variety or, at minimum, a geometry collection as done here. 
 
 ```{r}
 combine_geometry.geos_geometry <- function(x) {
@@ -150,7 +187,7 @@ geosdf <- as_tibble(guerry) |>
 geosdf
 ```
 
-Only those three methods we can now use dplyr functionality. 
+With only those three methods we can now use dplyr functionality. 
 
 ```{r}
 geosdf |> 
@@ -169,7 +206,7 @@ sdf_intersects.geos_geometry <- function(x, y, ...) {
 }
 ```
 
-To use this function let's sample 25 random points from the originally sf geometry and join on the region data to it. 
+To use this function let's sample 25 random points from the original sf geometry and join on the region data to it. 
 
 ```{r}
 pnt_sample <- sf::st_sample(guerry, 25)

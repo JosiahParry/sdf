@@ -1,8 +1,4 @@
 
-bounding_box.geos_geometry <- function(x) {
-  geos::as_geos_geometry(wk::wk_bbox(geo))
-}
-
 combine_geometry.geos_geometry <- function(x) {
   geos::geos_make_collection(x)
 }

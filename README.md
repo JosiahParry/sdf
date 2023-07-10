@@ -33,7 +33,12 @@ remotes::install_github("josiahparry/sdf")
 
 ## Example
 
+The `sdf` generics have been implemented for the `sf`, `geos`, and `s2`
+packages. `sdf` will work with those three packages out of the box.
+
 ``` r
+library(sf) # so sf methods work
+#> Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
 library(sdf)
 
 # pull some spatial data
@@ -41,61 +46,51 @@ data(guerry, package = "sfdep")
 g <- dplyr::select(guerry, code_dept, crime_pers, region)
 
 # using sf, cast to a spatial data frame
-sdf_sf <- as_sdf(guerry)
+sdf_sf <- as_sdf(g)
 
 sdf_sf
+#> Spatial Data Frame
 #> Geometry Type: sfc_MULTIPOLYGON
 #> Bounding box: xmin: 47680 ymin: 1703258 xmax: 1031401 ymax: 2677441
-#> # A tibble: 85 × 27
-#>    code_dept count ave_id…¹  dept region depar…² crime…³ crime…⁴ liter…⁵ donat…⁶
-#>    <fct>     <dbl>    <dbl> <int> <fct>  <fct>     <int>   <int>   <int>   <int>
-#>  1 01            1       49     1 E      Ain       28870   15890      37    5098
-#>  2 02            1      812     2 N      Aisne     26226    5521      51    8901
-#>  3 03            1     1418     3 C      Allier    26747    7925      13   10973
-#>  4 04            1     1603     4 E      Basses…   12935    7289      46    2733
-#>  5 05            1     1802     5 E      Hautes…   17488    8174      69    6962
-#>  6 07            1     2249     7 S      Ardeche    9474   10263      27    3188
-#>  7 08            1    35395     8 N      Ardenn…   35203    8847      67    6400
-#>  8 09            1     2526     9 S      Ariege     6173    9597      18    3542
-#>  9 10            1    34410    10 E      Aube      19602    4086      59    3608
-#> 10 11            1     2807    11 S      Aude      15647   10431      34    2582
-#> # … with 75 more rows, 17 more variables: infants <int>, suicides <int>,
-#> #   main_city <ord>, wealth <int>, commerce <int>, clergy <int>,
-#> #   crime_parents <int>, infanticide <int>, donation_clergy <int>,
-#> #   lottery <int>, desertion <int>, instruction <int>, prostitutes <int>,
-#> #   distance <dbl>, area <int>, pop1831 <dbl>, geometry <MULTIPOLYGON>, and
-#> #   abbreviated variable names ¹​ave_id_geo, ²​department, ³​crime_pers,
-#> #   ⁴​crime_prop, ⁵​literacy, ⁶​donations
+#> # A tibble: 85 × 4
+#>    code_dept crime_pers region                                          geometry
+#>    <fct>          <int> <fct>                                     <MULTIPOLYGON>
+#>  1 01             28870 E      (((801150 2092615, 800669 2093190, 800688 209543…
+#>  2 02             26226 N      (((729326 2521619, 729320 2521230, 729280 251854…
+#>  3 03             26747 C      (((710830 2137350, 711746 2136617, 712430 213521…
+#>  4 04             12935 E      (((882701 1920024, 882408 1920733, 881778 192120…
+#>  5 05             17488 E      (((886504 1922890, 885733 1922978, 885479 192327…
+#>  6 07              9474 S      (((747008 1925789, 746630 1925762, 745723 192513…
+#>  7 08             35203 N      (((818893 2514767, 818614 2514515, 817900 251446…
+#>  8 09              6173 S      (((509103 1747787, 508820 1747513, 508154 174709…
+#>  9 10             19602 E      (((775400 2345600, 775068 2345397, 773587 234517…
+#> 10 11             15647 S      (((626230 1810121, 626269 1810496, 627494 181132…
+#> # ℹ 75 more rows
 
-# using rust
-sdf_rs <- as_sdf(
+# using geos
+sdf_geos <- as_sdf(
   # convert geometry to rust geometry
-  dplyr::mutate(guerry, geometry = rsgeo::as_rsgeom(geometry))
+  dplyr::mutate(g, geometry = geos::as_geos_geometry(geometry))
 )
 
-sdf_rs
-#> Geometry Type: rs_MULTIPOLYGON
+sdf_geos
+#> Spatial Data Frame
+#> Geometry Type: geos_geometry
 #> Bounding box: xmin: 47680 ymin: 1703258 xmax: 1031401 ymax: 2677441
-#> # A tibble: 85 × 27
-#>    code_dept count ave_id…¹  dept region depar…² crime…³ crime…⁴ liter…⁵ donat…⁶
-#>    <fct>     <dbl>    <dbl> <int> <fct>  <fct>     <int>   <int>   <int>   <int>
-#>  1 01            1       49     1 E      Ain       28870   15890      37    5098
-#>  2 02            1      812     2 N      Aisne     26226    5521      51    8901
-#>  3 03            1     1418     3 C      Allier    26747    7925      13   10973
-#>  4 04            1     1603     4 E      Basses…   12935    7289      46    2733
-#>  5 05            1     1802     5 E      Hautes…   17488    8174      69    6962
-#>  6 07            1     2249     7 S      Ardeche    9474   10263      27    3188
-#>  7 08            1    35395     8 N      Ardenn…   35203    8847      67    6400
-#>  8 09            1     2526     9 S      Ariege     6173    9597      18    3542
-#>  9 10            1    34410    10 E      Aube      19602    4086      59    3608
-#> 10 11            1     2807    11 S      Aude      15647   10431      34    2582
-#> # … with 75 more rows, 17 more variables: infants <int>, suicides <int>,
-#> #   main_city <ord>, wealth <int>, commerce <int>, clergy <int>,
-#> #   crime_parents <int>, infanticide <int>, donation_clergy <int>,
-#> #   lottery <int>, desertion <int>, instruction <int>, prostitutes <int>,
-#> #   distance <dbl>, area <int>, pop1831 <dbl>, geometry <MULTIPOLYGON>, and
-#> #   abbreviated variable names ¹​ave_id_geo, ²​department, ³​crime_pers,
-#> #   ⁴​crime_prop, ⁵​literacy, ⁶​donations
+#> # A tibble: 85 × 4
+#>    code_dept crime_pers region geometry                                        
+#>    <fct>          <int> <fct>  <geos_geom>                                     
+#>  1 01             28870 E      <MULTIPOLYGON [785562 2073221...894622 2172530]>
+#>  2 02             26226 N      <MULTIPOLYGON [645357 2427270...738049 2564568]>
+#>  3 03             26747 C      <MULTIPOLYGON [595532 2104320...728480 2200625]>
+#>  4 04             12935 E      <MULTIPOLYGON [853311 1858801...970310 1972682]>
+#>  5 05             17488 E      <MULTIPOLYGON [845528 1915176...975716 2022608]>
+#>  6 07              9474 S      <MULTIPOLYGON [720908 1920016...801330 2043510]>
+#>  7 08             35203 N      <MULTIPOLYGON [722230 2472836...821101 2577475]>
+#>  8 09              6173 S      <MULTIPOLYGON [476458 1729992...586665 1813083]>
+#>  9 10             19602 E      <MULTIPOLYGON [677472 2326409...787769 2414830]>
+#> 10 11             15647 S      <MULTIPOLYGON [547293 1738382...673587 1828670]>
+#> # ℹ 75 more rows
 ```
 
 ``` r
@@ -104,6 +99,7 @@ library(dplyr, warn.conflicts = FALSE)
 sdf_sf |> 
   group_by(region) |> 
   summarise(total_crime = sum(crime_pers))
+#> Spatial Data Frame
 #> Geometry Type: sfc_MULTIPOLYGON
 #> Bounding box: xmin: 47680 ymin: 1703258 xmax: 1031401 ymax: 2677441
 #> # A tibble: 5 × 3
@@ -115,20 +111,45 @@ sdf_sf |>
 #> 4 S           203226 (((747008 1925789, 746630 1925762, 745723 1925138, 744216 …
 #> 5 W           382242 (((456425 2120055, 456229 2120382, 455943 2121064, 456070 …
 
-sdf_rs |> 
+sdf_geos |> 
   group_by(region) |> 
   summarise(total_crime = sum(crime_pers))
-#> Geometry Type: rs_MULTIPOLYGON
+#> Spatial Data Frame
+#> Geometry Type: geos_geometry
 #> Bounding box: xmin: 47680 ymin: 1703258 xmax: 1031401 ymax: 2677441
 #> # A tibble: 5 × 3
-#>   region total_crime geometry      
-#>   <fct>        <int> <MULTIPOLYGON>
-#> 1 C           385123 <MultiPolygon>
-#> 2 E           342028 <MultiPolygon>
-#> 3 N           384061 <MultiPolygon>
-#> 4 S           203226 <MultiPolygon>
-#> 5 W           382242 <MultiPolygon>
+#>   region total_crime geometry                                               
+#>   <fct>        <int> <geos_geom>                                            
+#> 1 C           385123 <GEOMETRYCOLLECTION [391570 1957191...789713 2438418]> 
+#> 2 E           342028 <GEOMETRYCOLLECTION [677472 1858801...1031401 2512709]>
+#> 3 N           384061 <GEOMETRYCOLLECTION [290741 2346870...987605 2677441]> 
+#> 4 S           203226 <GEOMETRYCOLLECTION [382108 1703258...972280 2043510]> 
+#> 5 W           382242 <GEOMETRYCOLLECTION [47680 1757230...529961 2444887]>
 ```
+
+## Philosophy
+
+There are a number of different geometry types among low-level
+libraries. Geometry types should be interchangeable and the type you use
+should not be dictated by the libraries you use. All geometries should
+be able to convert to and from one another. Some libraries have better
+performance, accuracy, or algorithms that can and should be used when
+appropriate.
+
+Geospatial and data science more broadly are quickly moving towards a
+unified memory format à la arrow. Being able to represent our geometries
+in a common memory format enables us to convert to and from anything.
+Today, in R, that approach is handled by `{wk}`. In the future, this
+will be `{geoarrow}`.
+
+This package is intended to serve as an example of what a spatial data
+frame of the future might look like. The geometry column is independent
+of the R package itself. All that is required is a number of s3 generic
+functions to be implemented.
+
+This is how I hope to see the `{sf}` package. I want to see it as an
+enabler of a variety of geometry backends some of which may even be
+lazily evaluated (such as a PostGIS backend).
 
 ## Required method implementations
 
@@ -136,12 +157,28 @@ The following generics must have an implementation for your geometry
 class. The geometry class must be an S3 object / compatible with a data
 frame.
 
-- `c`
+- `c()`
 - `is_geometry()`
 - `bounding_box()`
 - `combine_geometry()`
 
 Implementing these generics provides access to dplyr functionality only.
+
+### Default implementations
+
+Since the `wk` package acts as a middle-man between memory formats, we
+can use it for default implementations. Any object which is identified
+as a vector by `vctrs` and is handleable by `wk` will be minimally
+functional.
+
+- `is_geometry(x)` has a default implementation which ensures that `x`
+  is a vector and is useable by `wk` via `vctrs::vec_is()` and
+  `wk::is_handleable()`.
+
+- `bounding_box()` has default implementation of `wk::wk_bbox()`
+
+- `combine_geometry()` has a default implementation of
+  `wk::wk_collection()`
 
 ## Spatial joins and filters
 
@@ -152,13 +189,29 @@ predicate must return a list with the same length as `x`. Each element
 must be a list of integer vectors where each element indicates the
 corresponding elements in `y` where the predicate function is true.
 
-The following predicate generic functions are exported
-`sdf_intersects()`, `sdf_contains()`, `sdf_within()`, and
-`sdf_crosses()`. It is recommended that you implement these generics,
-though not mandatory. Any function that returns a sparse matrix as
-described above for two geometry columns can be used.
+The following predicate generic functions are exported:
+
+- `sdf_intersects()`
+- `sdf_contains()`
+- `sdf_within()`
+- `sdf_crosses()`
+- `sdf_covers()`
+- `sdf_covered_by()`
+- `sdf_equals()`
+- `sdf_disjoint()`
+- `sdf_touches()`
+- `sdf_overlaps()`
+
+It is recommended that you implement a few of generics, though not
+mandatory. Any function that returns a sparse matrix as described above
+for two geometry columns can be used in `sdf_join()` and `sdf_filter()`
 
 ## Other generics
+
+There are a number of other generics that are exports. The following
+generics are considered to be part of the “main” interface. These are
+the functions that are strongly recommended to implement for your
+geometry vector class.
 
 - `union_geometry()`
 - `simplify_geometry()`
@@ -168,6 +221,9 @@ described above for two geometry columns can be used.
 - `concave_hull()`
 
 ## Implementing `{geos}` generics
+
+While there already is a geos implementation, it is worth walking
+through how to do so.
 
 ``` r
 library(geos)
@@ -204,6 +260,8 @@ bounding_box(geo)
 
 For minimal functionality, we need to lastly provide a
 `combine_geometry()` method. This is used in the `summarise()` function.
+`combine_geometry()` is intended to combine single geometries into the
+multi variety or, at minimum, a geometry collection as done here.
 
 ``` r
 combine_geometry.geos_geometry <- function(x) {
@@ -219,12 +277,6 @@ Now we can create an sdf object with only this alone.
 
 ``` r
 library(sf)
-#> Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.1; sf_use_s2() is TRUE
-#> 
-#> Attaching package: 'sf'
-#> The following object is masked from 'package:sdf':
-#> 
-#>     is_geometry
 library(dplyr)
 
 geosdf <- as_tibble(guerry) |> 
@@ -232,36 +284,38 @@ geosdf <- as_tibble(guerry) |>
   as_sdf()
 
 geosdf
+#> Spatial Data Frame
 #> Geometry Type: geos_geometry
 #> Bounding box: xmin: 47680 ymin: 1703258 xmax: 172543 ymax: 1768513
 #> # A tibble: 85 × 27
-#>    code_dept count ave_id…¹  dept region depar…² crime…³ crime…⁴ liter…⁵ donat…⁶
-#>    <fct>     <dbl>    <dbl> <int> <fct>  <fct>     <int>   <int>   <int>   <int>
-#>  1 01            1       49     1 E      Ain       28870   15890      37    5098
-#>  2 02            1      812     2 N      Aisne     26226    5521      51    8901
-#>  3 03            1     1418     3 C      Allier    26747    7925      13   10973
-#>  4 04            1     1603     4 E      Basses…   12935    7289      46    2733
-#>  5 05            1     1802     5 E      Hautes…   17488    8174      69    6962
-#>  6 07            1     2249     7 S      Ardeche    9474   10263      27    3188
-#>  7 08            1    35395     8 N      Ardenn…   35203    8847      67    6400
-#>  8 09            1     2526     9 S      Ariege     6173    9597      18    3542
-#>  9 10            1    34410    10 E      Aube      19602    4086      59    3608
-#> 10 11            1     2807    11 S      Aude      15647   10431      34    2582
-#> # … with 75 more rows, 17 more variables: infants <int>, suicides <int>,
-#> #   main_city <ord>, wealth <int>, commerce <int>, clergy <int>,
-#> #   crime_parents <int>, infanticide <int>, donation_clergy <int>,
-#> #   lottery <int>, desertion <int>, instruction <int>, prostitutes <int>,
-#> #   distance <dbl>, area <int>, pop1831 <dbl>, geometry <geos_geom>, and
-#> #   abbreviated variable names ¹​ave_id_geo, ²​department, ³​crime_pers,
-#> #   ⁴​crime_prop, ⁵​literacy, ⁶​donations
+#>    code_dept count ave_id_geo  dept region department   crime_pers crime_prop
+#>    <fct>     <dbl>      <dbl> <int> <fct>  <fct>             <int>      <int>
+#>  1 01            1         49     1 E      Ain               28870      15890
+#>  2 02            1        812     2 N      Aisne             26226       5521
+#>  3 03            1       1418     3 C      Allier            26747       7925
+#>  4 04            1       1603     4 E      Basses-Alpes      12935       7289
+#>  5 05            1       1802     5 E      Hautes-Alpes      17488       8174
+#>  6 07            1       2249     7 S      Ardeche            9474      10263
+#>  7 08            1      35395     8 N      Ardennes          35203       8847
+#>  8 09            1       2526     9 S      Ariege             6173       9597
+#>  9 10            1      34410    10 E      Aube              19602       4086
+#> 10 11            1       2807    11 S      Aude              15647      10431
+#> # ℹ 75 more rows
+#> # ℹ 19 more variables: literacy <int>, donations <int>, infants <int>,
+#> #   suicides <int>, main_city <ord>, wealth <int>, commerce <int>,
+#> #   clergy <int>, crime_parents <int>, infanticide <int>,
+#> #   donation_clergy <int>, lottery <int>, desertion <int>, instruction <int>,
+#> #   prostitutes <int>, distance <dbl>, area <int>, pop1831 <dbl>,
+#> #   geometry <geos_geom>
 ```
 
-Only those three methods we can now use dplyr functionality.
+With only those three methods we can now use dplyr functionality.
 
 ``` r
 geosdf |> 
   group_by(code_dept) |> 
   summarise(total_crime = sum(crime_pers))
+#> Spatial Data Frame
 #> Geometry Type: geos_geometry
 #> Bounding box: xmin: 47680 ymin: 1703258 xmax: 172543 ymax: 1768513
 #> # A tibble: 85 × 3
@@ -277,7 +331,7 @@ geosdf |>
 #>  8 09               6173 <GEOMETRYCOLLECTION [476458 1729992...586665 1813083]>
 #>  9 10              19602 <GEOMETRYCOLLECTION [677472 2326409...787769 2414830]>
 #> 10 11              15647 <GEOMETRYCOLLECTION [547293 1738382...673587 1828670]>
-#> # … with 75 more rows
+#> # ℹ 75 more rows
 ```
 
 This alone is super useful! But we may also want to be able to implement
@@ -296,8 +350,8 @@ sdf_intersects.geos_geometry <- function(x, y, ...) {
 }
 ```
 
-To use this function let’s sample 25 random points from the originally
-sf geometry and join on the region data to it.
+To use this function let’s sample 25 random points from the original sf
+geometry and join on the region data to it.
 
 ``` r
 pnt_sample <- sf::st_sample(guerry, 25)
@@ -307,26 +361,27 @@ pnts <- as_sdf(
 )
 
 sdf_join(pnts, geosdf)
+#> Spatial Data Frame
 #> Geometry Type: geos_geometry
-#> Bounding box: xmin: 271837.44 ymin: 1720409.41 xmax: 271837.44 ymax: 1720409.41
-#> # A tibble: 25 × 27
-#>    code_dept count ave_id…¹  dept region depar…² crime…³ crime…⁴ liter…⁵ donat…⁶
-#>    <fct>     <dbl>    <dbl> <int> <fct>  <fct>     <int>   <int>   <int>   <int>
-#>  1 05            1     1802     5 E      Hautes…   17488    8174      69    6962
-#>  2 64            1    23572    64 W      Basses…   16722    8533      47    3299
-#>  3 36            1    12687    36 C      Indre     32404    7624      17   11315
-#>  4 61            1    21456    61 N      Orne      28329    8248      45    9242
-#>  5 41            1    14589    41 C      Loir-e…   21292    6017      27    5626
-#>  6 43            1    15339    43 C      Haute-…   16170   18043      21    2746
-#>  7 47            1    16326    47 W      Lot-et…   22969    8943      31    4432
-#>  8 07            1     2249     7 S      Ardeche    9474   10263      27    3188
-#>  9 88            1    31810    88 E      Vosges    18835    9044      62    4040
-#> 10 40            1    14431    40 W      Landes    17687    6170      28   12059
-#> # … with 15 more rows, 17 more variables: infants <int>, suicides <int>,
-#> #   main_city <ord>, wealth <int>, commerce <int>, clergy <int>,
-#> #   crime_parents <int>, infanticide <int>, donation_clergy <int>,
-#> #   lottery <int>, desertion <int>, instruction <int>, prostitutes <int>,
-#> #   distance <dbl>, area <int>, pop1831 <dbl>, geometry <geos_geom>, and
-#> #   abbreviated variable names ¹​ave_id_geo, ²​department, ³​crime_pers,
-#> #   ⁴​crime_prop, ⁵​literacy, ⁶​donations
+#> Bounding box: xmin: NA ymin: NA xmax: NA ymax: NA
+#> # A tibble: 93 × 27
+#>    code_dept count ave_id_geo  dept region department      crime_pers crime_prop
+#>    <fct>     <dbl>      <dbl> <int> <fct>  <fct>                <int>      <int>
+#>  1 11            1       2807    11 S      Aude                 15647      10431
+#>  2 17            1       5205    17 W      Charente-Infer…      18712       5357
+#>  3 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
+#>  4 26            1       8370    26 E      Drome                13396       7759
+#>  5 22            1      33634    22 W      Cotes-du-Nord        28607       7050
+#>  6 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
+#>  7 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
+#>  8 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
+#>  9 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
+#> 10 <NA>         NA         NA    NA <NA>   <NA>                    NA         NA
+#> # ℹ 83 more rows
+#> # ℹ 19 more variables: literacy <int>, donations <int>, infants <int>,
+#> #   suicides <int>, main_city <ord>, wealth <int>, commerce <int>,
+#> #   clergy <int>, crime_parents <int>, infanticide <int>,
+#> #   donation_clergy <int>, lottery <int>, desertion <int>, instruction <int>,
+#> #   prostitutes <int>, distance <dbl>, area <int>, pop1831 <dbl>,
+#> #   geometry <geos_geom>
 ```
