@@ -4,7 +4,7 @@
 \alias{is_geometry}
 \alias{bounding_box}
 \alias{combine_geometry}
-\title{Required Generics}
+\title{Required generics}
 \usage{
 is_geometry(x)
 
@@ -12,6 +12,31 @@ bounding_box(x)
 
 combine_geometry(x)
 }
+\arguments{
+\item{x}{a geometry vector.}
+}
+\value{
+\code{is_geometry()} a single logical. \code{bounding_box()} a named numeric vector of
+length 4. \code{combine_geometry()} a geometry vector of length 1.
+}
 \description{
-Required Generics
+The three generics a geometry vector must implement to work as the geometry
+column of a spatial data frame.
+}
+\details{
+\code{is_geometry()} must return \code{TRUE} for the class. \code{bounding_box()} must
+return a numeric vector named \code{xmin}, \code{ymin}, \code{xmax}, \code{ymax} covering the
+whole vector. \code{combine_geometry()} must return the vector as a single
+geometry. The defaults use wk, so a class with a wk handler already has all
+three.
+}
+\examples{
+if (requireNamespace("sf", quietly = TRUE)) {
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  geometry <- sf::st_geometry(nc)
+
+  is_geometry(geometry)
+  bounding_box(geometry)
+  combine_geometry(geometry)
+}
 }

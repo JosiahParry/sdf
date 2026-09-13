@@ -2,10 +2,27 @@
 % Please edit documentation in R/utils.R
 \name{sdf_geometry}
 \alias{sdf_geometry}
-\title{Geometry Accessor}
+\title{Geometry accessor}
 \usage{
 sdf_geometry(x)
 }
+\arguments{
+\item{x}{a spatial data frame.}
+}
+\value{
+The geometry vector of \code{x}.
+}
 \description{
-Geometry Accessor
+Pulls the geometry column out of a spatial data frame, whatever it is named.
+}
+\examples{
+if (requireNamespace("sf", quietly = TRUE)) {
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  x <- as_sdf(tibble::tibble(
+    name = as.character(nc$NAME),
+    geometry = sf::st_geometry(nc)
+  ))
+
+  sdf_geometry(x)
+}
 }

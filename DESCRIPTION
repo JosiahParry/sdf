@@ -1,25 +1,35 @@
 Package: sdf
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
+Title: An Extensible Spatial Data Frame
+Version: 0.1.0
+Authors@R:
     person("Josiah", "Parry", , "josiah.parry@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9910-865X"))
-Description: What the package does (one paragraph).
+Description: A spatial data frame that is agnostic to the geometry
+    representation it holds. A geometry vector becomes usable by
+    implementing a small set of generics, in the manner of a trait, after
+    which the spatial data frame, its 'dplyr' methods, and the spatial
+    join and filter work unchanged. Implementations for the 'sf', 'geos',
+    and 's2' packages are included.
 License: MIT + file LICENSE
-Suggests: 
+URL: https://github.com/JosiahParry/sdf
+BugReports: https://github.com/JosiahParry/sdf/issues
+Suggests:
+    geos,
+    s2,
+    sf,
     testthat (>= 3.0.0),
     usethis
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
-Imports: 
+Imports:
+    cli,
     dplyr,
-    geos,
     rlang,
-    s2,
-    sf,
+    stats,
     tibble,
+    tidyselect,
     vctrs,
     wk
+Config/roxygen2/version: 8.1.0

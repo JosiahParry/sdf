@@ -5,8 +5,31 @@
 
 # Required generics -------------------------------------------------------
 
-#' Required Generics
-
+#' Required generics
+#'
+#' The three generics a geometry vector must implement to work as the geometry
+#' column of a spatial data frame.
+#'
+#' @details
+#' `is_geometry()` must return `TRUE` for the class. `bounding_box()` must
+#' return a numeric vector named `xmin`, `ymin`, `xmax`, `ymax` covering the
+#' whole vector. `combine_geometry()` must return the vector as a single
+#' geometry. The defaults use wk, so a class with a wk handler already has all
+#' three.
+#'
+#' @param x a geometry vector.
+#' @returns
+#' `is_geometry()` a single logical. `bounding_box()` a named numeric vector of
+#' length 4. `combine_geometry()` a geometry vector of length 1.
+#' @examples
+#' if (requireNamespace("sf", quietly = TRUE)) {
+#'   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+#'   geometry <- sf::st_geometry(nc)
+#'
+#'   is_geometry(geometry)
+#'   bounding_box(geometry)
+#'   combine_geometry(geometry)
+#' }
 #' @export
 #' @rdname generics
 is_geometry <- function(x) UseMethod("is_geometry")
@@ -37,10 +60,24 @@ combine_geometry.default <- function(x) wk::wk_collection(x)
 # Main interface ----------------------------------------------------------
 # These are the minimum suggested, but still optional, generics to implement
 
-#' Primary Interface
+#' Primary interface
 #'
-#' These functions are optional but strongly suggested.
+#' Optional but strongly suggested: the operations a spatial data frame is
+#' usually asked for.
 #'
+#' @param x a geometry vector.
+#' @param distance the buffer distance.
+#' @param concavity how tightly the hull follows the points.
+#' @param ... passed to the method.
+#' @returns A geometry vector. `union_geometry()` returns one of length 1.
+#' @examples
+#' if (requireNamespace("sf", quietly = TRUE)) {
+#'   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+#'   geometry <- sf::st_geometry(nc)
+#'
+#'   centroid(geometry)
+#'   convex_hull(geometry)
+#' }
 #' @export
 #' @rdname primary
 union_geometry <- function(x) UseMethod("union_geometry")
@@ -71,7 +108,19 @@ concave_hull <- function(x, concavity, ...) UseMethod("concave_hull")
 # these are optional generics to implement that are very common and could be
 # useful to implement. But less important than the main interface.
 
-#' Optional Generics
+#' Optional generics
+#'
+#' Common measures a backend may implement.
+#'
+#' @param x a geometry vector.
+#' @param ... passed to the method.
+#' @returns A numeric vector as long as `x`.
+#' @examples
+#' if (requireNamespace("sf", quietly = TRUE)) {
+#'   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+#'
+#'   sdf_area(sf::st_geometry(nc))
+#' }
 #' @export
 #' @rdname optional
 sdf_length <- function(x, ...) UseMethod("sdf_length")

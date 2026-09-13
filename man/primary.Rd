@@ -7,7 +7,7 @@
 \alias{centroid}
 \alias{convex_hull}
 \alias{concave_hull}
-\title{Primary Interface}
+\title{Primary interface}
 \usage{
 union_geometry(x)
 
@@ -21,6 +21,28 @@ convex_hull(x)
 
 concave_hull(x, concavity, ...)
 }
+\arguments{
+\item{x}{a geometry vector.}
+
+\item{...}{passed to the method.}
+
+\item{distance}{the buffer distance.}
+
+\item{concavity}{how tightly the hull follows the points.}
+}
+\value{
+A geometry vector. \code{union_geometry()} returns one of length 1.
+}
 \description{
-These functions are optional but strongly suggested.
+Optional but strongly suggested: the operations a spatial data frame is
+usually asked for.
+}
+\examples{
+if (requireNamespace("sf", quietly = TRUE)) {
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  geometry <- sf::st_geometry(nc)
+
+  centroid(geometry)
+  convex_hull(geometry)
+}
 }

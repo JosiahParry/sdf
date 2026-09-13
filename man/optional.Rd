@@ -3,12 +3,27 @@
 \name{sdf_length}
 \alias{sdf_length}
 \alias{sdf_area}
-\title{Optional Generics}
+\title{Optional generics}
 \usage{
 sdf_length(x, ...)
 
 sdf_area(x, ...)
 }
+\arguments{
+\item{x}{a geometry vector.}
+
+\item{...}{passed to the method.}
+}
+\value{
+A numeric vector as long as \code{x}.
+}
 \description{
-Optional Generics
+Common measures a backend may implement.
+}
+\examples{
+if (requireNamespace("sf", quietly = TRUE)) {
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+
+  sdf_area(sf::st_geometry(nc))
+}
 }

@@ -11,8 +11,7 @@
 \alias{sdf_disjoint}
 \alias{sdf_touches}
 \alias{sdf_overlaps}
-\title{Spatial Predicate Functions
-Predicates are optional, but enable the use of \code{sdf_join()}.}
+\title{Spatial predicates}
 \usage{
 sdf_intersects(x, y, ...)
 
@@ -34,8 +33,30 @@ sdf_touches(x, y, ...)
 
 sdf_overlaps(x, y, ...)
 }
+\arguments{
+\item{x, y}{geometry vectors.}
+
+\item{...}{passed to the method.}
+}
+\value{
+A list as long as \code{x}, each element the row positions of \code{y} that
+match.
+}
 \description{
-Predicates should return a sparse matrix list representation. The elements the list
-are an integer vector indicating the features where the predicate is \code{TRUE}.
-The vector must be the \emph{row position}.
+Each returns, for every row of \code{x}, the row positions of \code{y} that the
+relationship holds for. Implementing them is optional, but they are what
+\code{\link[=sdf_join]{sdf_join()}} and \code{\link[=sdf_filter]{sdf_filter()}} run on.
+}
+\details{
+A method returns a list as long as \code{x}, whose elements are the row positions
+of \code{y}. Integer is the natural type but doubles are accepted, and an element
+of length zero means no match. An sf \code{sgbp} already has this shape.
+}
+\examples{
+if (requireNamespace("sf", quietly = TRUE)) {
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  geometry <- sf::st_geometry(nc)
+
+  sdf_intersects(geometry[1:3], geometry[1:10])
+}
 }

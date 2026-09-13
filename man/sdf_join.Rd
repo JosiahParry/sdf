@@ -2,13 +2,69 @@
 % Please edit documentation in R/sdf-join.R
 \name{sdf_join}
 \alias{sdf_join}
-\title{Left join only}
+\alias{sdf_join.default}
+\alias{sdf_filter}
+\alias{sdf_filter.default}
+\title{Spatial join and filter}
 \usage{
 sdf_join(x, y, predicate = sdf_intersects, ..., suffix = c("_x", "_y"))
+
+\method{sdf_join}{default}(x, y, predicate = sdf_intersects, ..., suffix = c("_x", "_y"))
+
+sdf_filter(x, y, predicate = sdf_intersects, ...)
+
+\method{sdf_filter}{default}(x, y, predicate = sdf_intersects, ...)
 }
 \arguments{
-\item{predicate}{a function that returns a sparse matrix list representation}
+\item{x, y}{spatial data frames.}
+
+\item{predicate}{a function of \code{x} and \code{y} returning the row positions of
+\code{y} matching each row of \code{x}, such as \code{\link[=sdf_intersects]{sdf_intersects()}}.}
+
+\item{...}{passed to \code{predicate}.}
+
+\item{suffix}{a character vector of length 2, the suffixes for names the two
+sides share.}
+}
+\value{
+\code{sdf_join()} returns a spatial data frame of the matched rows.
+\code{sdf_filter()} returns \code{x} with the unmatched rows dropped.
 }
 \description{
-Left join only
+\code{sdf_join()} attaches the columns of \code{y} to each row of \code{x} that it relates
+to spatially. \code{sdf_filter()} keeps the rows of \code{x} that relate to any row of
+\code{y}, without adding columns.
+}
+\details{
+Both dispatch on the geometry column of \code{x}, so a backend can replace either
+with an implementation in its own types. The default works for any backend
+whose geometry vector can be subset with \code{[} and whose predicate returns row
+positions.
+
+A row of \code{x} matching several rows of \code{y} is repeated once per match, and a
+row matching nothing is kept against \code{NA}, so \code{sdf_join()} is a left join.
+Names the two sides share are suffixed, and the geometry of the result is
+the geometry of \code{x}.
+}
+\examples{
+if (requireNamespace("sf", quietly = TRUE)) {
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+
+  counties <- as_sdf(tibble::tibble(
+    name = as.character(nc$NAME),
+    geometry = sf::st_geometry(nc)
+  ))
+
+  sites <- as_sdf(tibble::tibble(
+    id = 1:2,
+    geometry = sf::st_sfc(
+      sf::st_point(c(-78.6, 35.8)),
+      sf::st_point(c(-80.8, 35.2)),
+      crs = sf::st_crs(nc)
+    )
+  ))
+
+  sdf_join(sites, counties, predicate = sdf_within)
+  sdf_filter(counties, sites)
+}
 }
