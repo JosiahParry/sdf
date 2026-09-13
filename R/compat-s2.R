@@ -6,22 +6,29 @@
 
 # Must return TRUE for your class
 #' @export
-is_geometry.s2_geometry <- function(x) {
-  inherits(x, "s2_geometry")
+is_geometry.s2_geography <- function(x) {
+  inherits(x, "s2_geography")
 }
 
 
 # If you class implements a wk handler, the default method will work.
 #' @export
-bounding_box.s2_geometry <- function(x) {
+bounding_box.s2_geography <- function(x) {
+  # s2_bounds_rect() gives a one row data frame, not the numeric vector the
+  # bounding box contract asks for
   bbox <- s2::s2_bounds_rect(s2::s2_union_agg(x))
-  names(bbox) <- c("xmin", "ymin", "xmax", "ymax")
-  bbox
+
+  c(
+    xmin = bbox$lng_lo,
+    ymin = bbox$lat_lo,
+    xmax = bbox$lng_hi,
+    ymax = bbox$lat_hi
+  )
 }
 
 # This must return a single geometry from a vector of geometries
 #' @export
-combine_geometry.s2_geometry <- function(x) {
+combine_geometry.s2_geography <- function(x) {
   s2::s2_rebuild_agg(x)
 }
 
@@ -32,49 +39,49 @@ combine_geometry.s2_geometry <- function(x) {
 # The vector must be the _row position_.
 
 #' @export
-sdf_intersects.s2_geometry <- function(x, y, ...) {
+sdf_intersects.s2_geography <- function(x, y, ...) {
   s2::s2_intersects_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_contains.s2_geometry <- function(x, y, ...) {
+sdf_contains.s2_geography <- function(x, y, ...) {
   s2::s2_contains_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_within.s2_geometry <- function(x, y, ...) {
+sdf_within.s2_geography <- function(x, y, ...) {
   s2::s2_within_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_covers.s2_geometry <- function(x, y, ...) {
+sdf_covers.s2_geography <- function(x, y, ...) {
   s2::s2_covers_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_covered_by.s2_geometry <- function(x, y, ...) {
+sdf_covered_by.s2_geography <- function(x, y, ...) {
   s2::s2_covered_by_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_equals.s2_geometry <- function(x, y, ...) {
+sdf_equals.s2_geography <- function(x, y, ...) {
   s2::s2_equals_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_disjoint.s2_geometry <- function(x, y, ...) {
+sdf_disjoint.s2_geography <- function(x, y, ...) {
   s2::s2_disjoint_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_touches.s2_geometry <- function(x, y, ...) {
+sdf_touches.s2_geography <- function(x, y, ...) {
   s2::s2_touches_matrix(x, y, ...)
 }
 
@@ -83,26 +90,26 @@ sdf_touches.s2_geometry <- function(x, y, ...) {
 # These are optional functions for the sdf interface.
 
 #' @export
-union_geometry.s2_geometry <- function(x) {
+union_geometry.s2_geography <- function(x) {
   s2::s2_union_agg(x)
 }
 
 #' @export
-simplify_geometry.s2_geometry <- function(x, tolerance,...) {
+simplify_geometry.s2_geography <- function(x, tolerance,...) {
   s2::s2_simplify(x, tolerance, ...)
 }
 
 #' @export
-buffer_geometry.s2_geometry <- function(x, distance, ...) {
+buffer_geometry.s2_geography <- function(x, distance, ...) {
   s2::s2_buffer_cells(x, distance, ...)
 }
 
 #' @export
-centroid.s2_geometry <- function(x) {
+centroid.s2_geography <- function(x) {
   s2::s2_centroid(x)
 }
 
 #' @export
-convex_hull.s2_geometry <- function(x) {
+convex_hull.s2_geography <- function(x) {
   s2::s2_convex_hull(x)
 }
