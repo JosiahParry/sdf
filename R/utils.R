@@ -8,7 +8,22 @@ validate_bbox <- function(x) {
   x
 }
 
-#' Geometry Accessor
+#' Geometry accessor
+#'
+#' Pulls the geometry column out of a spatial data frame, whatever it is named.
+#'
+#' @param x a spatial data frame.
+#' @returns The geometry vector of `x`.
+#' @examples
+#' if (requireNamespace("sf", quietly = TRUE)) {
+#'   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+#'   x <- as_sdf(tibble::tibble(
+#'     name = as.character(nc$NAME),
+#'     geometry = sf::st_geometry(nc)
+#'   ))
+#'
+#'   sdf_geometry(x)
+#' }
 #' @export
 sdf_geometry <- function(x) {
   x[[attr(x, "geom_column")]]

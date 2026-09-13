@@ -1,11 +1,25 @@
-#' Spatial Predicate Functions
-#' Predicates are optional, but enable the use of `sdf_join()`.
+#' Spatial predicates
 #'
+#' Each returns, for every row of `x`, the row positions of `y` that the
+#' relationship holds for. Implementing them is optional, but they are what
+#' [sdf_join()] and [sdf_filter()] run on.
 #'
-#' Predicates should return a sparse matrix list representation. The elements the list
-#' are an integer vector indicating the features where the predicate is `TRUE`.
-#' The vector must be the _row position_.
-
+#' @details
+#' A method returns a list as long as `x`, whose elements are the row positions
+#' of `y`. Integer is the natural type but doubles are accepted, and an element
+#' of length zero means no match. An sf `sgbp` already has this shape.
+#'
+#' @param x,y geometry vectors.
+#' @param ... passed to the method.
+#' @returns A list as long as `x`, each element the row positions of `y` that
+#'   match.
+#' @examples
+#' if (requireNamespace("sf", quietly = TRUE)) {
+#'   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+#'   geometry <- sf::st_geometry(nc)
+#'
+#'   sdf_intersects(geometry[1:3], geometry[1:10])
+#' }
 #' @export
 #' @rdname predicates
 sdf_intersects <- function(x, y, ...) UseMethod("sdf_intersects")
