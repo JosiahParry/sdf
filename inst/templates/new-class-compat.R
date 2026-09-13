@@ -24,7 +24,7 @@ combine_geometry.{{class_name}} <- function(x) {
 }
 
 # Predicates --------------------------------------------------------------
-# Predicates are optional, but enable the use of `sdf_join()`. Predicates
+# Predicates are optional, but enable the use of `st_join()`. Predicates
 # should return a sparse matrix list representation. The elements the list
 # are an integer vector indicating the features where the predicate is `TRUE`.
 # The vector must be the _row position_.

@@ -14,8 +14,10 @@ License: MIT + file LICENSE
 URL: https://github.com/JosiahParry/sdf
 BugReports: https://github.com/JosiahParry/sdf/issues
 Suggests:
+    duckspatial,
     geos,
     s2,
+    sedonadb,
     sf,
     testthat (>= 3.0.0),
     usethis

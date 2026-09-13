@@ -35,7 +35,7 @@ summarise.sdf <- function(.data, ...) {
 
   summarized_geoms <- lapply(
     gd$.rows,
-    function(ids) combine_geometry(geom_col[ids])
+    function(ids) st_collect(geom_col[ids])
   )
 
   res <- NextMethod()

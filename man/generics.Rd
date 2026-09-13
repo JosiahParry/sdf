@@ -2,33 +2,34 @@
 % Please edit documentation in R/generics.R
 \name{is_geometry}
 \alias{is_geometry}
-\alias{bounding_box}
-\alias{combine_geometry}
+\alias{st_extent}
+\alias{st_collect}
 \title{Required generics}
 \usage{
 is_geometry(x)
 
-bounding_box(x)
+st_extent(x)
 
-combine_geometry(x)
+st_collect(x)
 }
 \arguments{
 \item{x}{a geometry vector.}
 }
 \value{
-\code{is_geometry()} a single logical. \code{bounding_box()} a named numeric vector of
-length 4. \code{combine_geometry()} a geometry vector of length 1.
+\code{is_geometry()} a single logical. \code{st_extent()} a named numeric vector of
+length 4. \code{st_collect()} a geometry vector of length 1.
 }
 \description{
 The three generics a geometry vector must implement to work as the geometry
 column of a spatial data frame.
 }
 \details{
-\code{is_geometry()} must return \code{TRUE} for the class. \code{bounding_box()} must
+\code{is_geometry()} must return \code{TRUE} for the class. \code{st_extent()} must
 return a numeric vector named \code{xmin}, \code{ymin}, \code{xmax}, \code{ymax} covering the
-whole vector. \code{combine_geometry()} must return the vector as a single
-geometry. The defaults use wk, so a class with a wk handler already has all
-three.
+whole vector. \code{st_collect()} must return the vector as a single geometry,
+following PostGIS \code{ST_Collect}: a \verb{MULTI*} where the parts agree on a type
+and a \code{GEOMETRYCOLLECTION} where they do not. The defaults use wk, so a
+class with a wk handler already has all three.
 }
 \examples{
 if (requireNamespace("sf", quietly = TRUE)) {
@@ -36,7 +37,7 @@ if (requireNamespace("sf", quietly = TRUE)) {
   geometry <- sf::st_geometry(nc)
 
   is_geometry(geometry)
-  bounding_box(geometry)
-  combine_geometry(geometry)
+  st_extent(geometry)
+  st_collect(geometry)
 }
 }

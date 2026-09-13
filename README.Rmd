@@ -77,13 +77,21 @@ The spatial data frame is compatible with dplyr out of the box and it doesn't ca
 ```{r}
 library(dplyr, warn.conflicts = FALSE)
 
-sdf_sf |> 
-  group_by(region) |> 
+sdf_sf |>
+  group_by(region) |>
   summarise(total_crime = sum(crime_pers))
 
-sdf_geos |> 
-  group_by(region) |> 
+sdf_geos |>
+  group_by(region) |>
   summarise(total_crime = sum(crime_pers))
+
+library(geoarrowrs)
+as_sdf(
+  dplyr::mutate(
+    dplyr::as_tibble(g),
+    geometry = geoarrow::as_geoarrow_vctr(geometry)
+  )
+)
 ```
 
 ## Philosophy
@@ -121,7 +129,7 @@ Since the `wk` package acts as a middle-man between memory formats, we can use i
 
 ## Spatial joins and filters
 
-The functions `sdf_join()` and `sdf_filter()` have an argument `predicate` which takes a predicate function—by default `sdf_intersects()`. For two spatial data frames `x` and `y` the predicate must return a list with the same length as `x`. Each element must be a list of integer vectors where each element indicates the corresponding elements in `y` where the predicate function is true. 
+The functions `st_join()` and `st_filter()` have an argument `predicate` which takes a predicate function—by default `sdf_intersects()`. For two spatial data frames `x` and `y` the predicate must return a list with the same length as `x`. Each element must be a list of integer vectors where each element indicates the corresponding elements in `y` where the predicate function is true. 
 
 The following predicate generic functions are exported:
 
@@ -136,7 +144,7 @@ The following predicate generic functions are exported:
 - `sdf_touches()`
 - `sdf_overlaps()`
 
-It is recommended that you implement a few of generics, though not mandatory. Any function that returns a sparse matrix as described above for two geometry columns can be used in `sdf_join()` and `sdf_filter()`
+It is recommended that you implement a few of generics, though not mandatory. Any function that returns a sparse matrix as described above for two geometry columns can be used in `st_join()` and `st_filter()`
 
 ## Other generics 
 
@@ -161,14 +169,20 @@ To this end there are two templates for you. `use_sdf_template_class()` will ope
 The first 30 lines of the template are below to illustrate what the template looks like:
 
 ```{r, echo = FALSE}
-cat(readLines(system.file("templates/new-class-compat.R", package = "sdf"))[1:30], sep = "\n")
+cat(
+  readLines(system.file("templates/new-class-compat.R", package = "sdf"))[1:30],
+  sep = "\n"
+)
 ```
 Secondly the function `use_sdf_template_zzz()` will create the required `.onLoad()` function call in a `zzz.R` file for you to register your methods and class. 
 
 The first 15 lines are below for an example.
 
 ```{r, echo = FALSE}
-cat(readLines(system.file("templates/zzz.R", package = "sdf"))[1:15], sep = "\n")
+cat(
+  readLines(system.file("templates/zzz.R", package = "sdf"))[1:15],
+  sep = "\n"
+)
 ```
 
 
@@ -178,7 +192,7 @@ While there already is a geos implementation, it is worth walking through how to
 
 ```{r}
 library(geos)
-geo <-  as_geos_geometry(guerry$geometry)
+geo <- as_geos_geometry(guerry$geometry)
 ```
 
 The first step is to define the `is_geometry()` generic which must return `TRUE` for your geometry class. 
@@ -216,8 +230,8 @@ Now we can create an sdf object with only this alone.
 library(sf)
 library(dplyr)
 
-geosdf <- as_tibble(guerry) |> 
-  mutate(geometry = as_geos_geometry(geometry)) |> 
+geosdf <- as_tibble(guerry) |>
+  mutate(geometry = as_geos_geometry(geometry)) |>
   as_sdf()
 
 geosdf
@@ -226,8 +240,8 @@ geosdf
 With only those three methods we can now use dplyr functionality. 
 
 ```{r}
-geosdf |> 
-  group_by(code_dept) |> 
+geosdf |>
+  group_by(code_dept) |>
   summarise(total_crime = sum(crime_pers))
 ```
 
@@ -251,6 +265,6 @@ pnts <- as_sdf(
   list(geometry = as_geos_geometry(pnt_sample))
 )
 
-sdf_join(pnts, geosdf)
+st_join(pnts, geosdf)
 ```
 

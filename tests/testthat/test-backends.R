@@ -6,10 +6,10 @@ test_that("the sf backend is registered and dispatches", {
   geometry <- sdf_geometry(nc_sdf())
 
   expect_true(is_geometry(geometry))
-  expect_named(bounding_box(geometry), c("xmin", "ymin", "xmax", "ymax"))
-  expect_length(combine_geometry(geometry), 1L)
-  expect_s3_class(sdf_intersects(geometry[1:3], geometry[1:5]), "sgbp")
-  expect_s3_class(simplify_geometry(geometry[1:3], 0.05), "sfc")
+  expect_named(st_extent(geometry), c("xmin", "ymin", "xmax", "ymax"))
+  expect_length(st_collect(geometry), 1L)
+  expect_s3_class(st_intersects(geometry[1:3], geometry[1:5]), "sgbp")
+  expect_s3_class(st_simplify(geometry[1:3], 0.05), "sfc")
 })
 
 test_that("the geos backend is registered and dispatches", {
@@ -18,9 +18,9 @@ test_that("the geos backend is registered and dispatches", {
   geometry <- geos::as_geos_geometry(sdf_geometry(nc_sdf()))
 
   expect_true(is_geometry(geometry))
-  expect_named(bounding_box(geometry), c("xmin", "ymin", "xmax", "ymax"))
-  expect_length(combine_geometry(geometry), 1L)
-  expect_type(sdf_intersects(geometry[1:3], geometry[1:5]), "list")
+  expect_named(st_extent(geometry), c("xmin", "ymin", "xmax", "ymax"))
+  expect_length(st_collect(geometry), 1L)
+  expect_type(st_intersects(geometry[1:3], geometry[1:5]), "list")
 })
 
 test_that("the s2 backend is registered and dispatches", {
@@ -29,8 +29,8 @@ test_that("the s2 backend is registered and dispatches", {
   geometry <- s2::as_s2_geography(sdf_geometry(nc_sdf()))
 
   expect_true(is_geometry(geometry))
-  expect_named(bounding_box(geometry), c("xmin", "ymin", "xmax", "ymax"))
-  expect_type(sdf_intersects(geometry[1:3], geometry[1:5]), "list")
+  expect_named(st_extent(geometry), c("xmin", "ymin", "xmax", "ymax"))
+  expect_type(st_intersects(geometry[1:3], geometry[1:5]), "list")
 })
 
 test_that("the predicates point the same way in every backend", {
@@ -40,8 +40,8 @@ test_that("the predicates point the same way in every backend", {
   counties <- sdf_geometry(nc_sdf())
   sites <- sdf_geometry(site_sdf())
 
-  from_sf <- unlist(sdf_within(sites, counties))
-  from_geos <- unlist(sdf_within(
+  from_sf <- unlist(st_within(sites, counties))
+  from_geos <- unlist(st_within(
     geos::as_geos_geometry(sites),
     geos::as_geos_geometry(counties)
   ))
@@ -64,7 +64,7 @@ test_that("a join gives the same answer in every backend", {
   }
 
   expect_setequal(
-    sdf_join(sites, counties, predicate = sdf_within)$name,
-    sdf_join(as_geos(sites), as_geos(counties), predicate = sdf_within)$name
+    st_join(sites, counties, predicate = st_within)$name,
+    st_join(as_geos(sites), as_geos(counties), predicate = st_within)$name
   )
 })

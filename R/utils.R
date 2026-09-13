@@ -29,15 +29,6 @@ sdf_geometry <- function(x) {
   x[[attr(x, "geom_column")]]
 }
 
-#' @export
-is_geometry.default <- function(x) {
-  # a catch all for sfc, geos, and rust geometries.
-  inherits(
-    x,
-    c("sfc",
-      "geos_geometry",
-      "rs_POINT", "rs_MULTIPOINT",
-      "rs_POLYGON", "rs_MULTIPOLYGON",
-      "rs_LINESTRING", "rs_MULTILINESTRING")
-  )
-}
+# is_geometry.default lives in generics.R. A second copy here used to shadow it
+# through collation order, so the documented wk default never applied and any
+# type not on its hardcoded list was invisible to as_sdf().

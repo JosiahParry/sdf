@@ -25,7 +25,7 @@ A spatial data frame, a tibble of class \code{sdf}.
 \details{
 The geometry column is found with \code{\link[=is_geometry]{is_geometry()}}, so any vector whose class
 implements the sdf generics can be the geometry. The bounding box is computed
-once with \code{\link[=bounding_box]{bounding_box()}} and carried as an attribute.
+once with \code{\link[=st_extent]{st_extent()}} and carried as an attribute.
 }
 \examples{
 if (requireNamespace("sf", quietly = TRUE)) {

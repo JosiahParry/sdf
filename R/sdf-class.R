@@ -10,7 +10,7 @@ which_is_geom_col <- function(x) which(vapply(x, is_geometry, logical(1)))
 #' @details
 #' The geometry column is found with [is_geometry()], so any vector whose class
 #' implements the sdf generics can be the geometry. The bounding box is computed
-#' once with [bounding_box()] and carried as an attribute.
+#' once with [st_extent()] and carried as an attribute.
 #'
 #' @param x for `as_sdf()`, a data frame holding a geometry column. For
 #'   `new_sdf()`, a data frame or named list of the other columns.
@@ -40,7 +40,7 @@ as_sdf <- function(x) {
     x,
     class = "sdf",
     geom_column = names(geom_col)[1],
-    bbox = validate_bbox(bounding_box(x[[geom_col[[1]]]]))
+    bbox = validate_bbox(st_extent(x[[geom_col[[1]]]]))
   )
 }
 
@@ -51,7 +51,7 @@ new_sdf <- function(x, geometry) {
     vctrs::df_list(!!!x, geometry = geometry),
     class = "sdf",
     geom_column = "geometry",
-    bbox = validate_bbox(bounding_box(geometry))
+    bbox = validate_bbox(st_extent(geometry))
   )
 }
 

@@ -13,7 +13,7 @@ is_geometry.s2_geography <- function(x) {
 
 # If you class implements a wk handler, the default method will work.
 #' @export
-bounding_box.s2_geography <- function(x) {
+st_extent.s2_geography <- function(x) {
   # s2_bounds_rect() gives a one row data frame, not the numeric vector the
   # bounding box contract asks for
   bbox <- s2::s2_bounds_rect(s2::s2_union_agg(x))
@@ -28,60 +28,60 @@ bounding_box.s2_geography <- function(x) {
 
 # This must return a single geometry from a vector of geometries
 #' @export
-combine_geometry.s2_geography <- function(x) {
+st_collect.s2_geography <- function(x) {
   s2::s2_rebuild_agg(x)
 }
 
 # Predicates --------------------------------------------------------------
-# Predicates are optional, but enable the use of `sdf_join()`. Predicates
+# Predicates are optional, but enable the use of `st_join()`. Predicates
 # should return a sparse matrix list representation. The elements the list
 # are an integer vector indicating the features where the predicate is `TRUE`.
 # The vector must be the _row position_.
 
 #' @export
-sdf_intersects.s2_geography <- function(x, y, ...) {
+st_intersects.s2_geography <- function(x, y, ...) {
   s2::s2_intersects_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_contains.s2_geography <- function(x, y, ...) {
+st_contains.s2_geography <- function(x, y, ...) {
   s2::s2_contains_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_within.s2_geography <- function(x, y, ...) {
+st_within.s2_geography <- function(x, y, ...) {
   s2::s2_within_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_covers.s2_geography <- function(x, y, ...) {
+st_covers.s2_geography <- function(x, y, ...) {
   s2::s2_covers_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_covered_by.s2_geography <- function(x, y, ...) {
+st_covered_by.s2_geography <- function(x, y, ...) {
   s2::s2_covered_by_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_equals.s2_geography <- function(x, y, ...) {
+st_equals.s2_geography <- function(x, y, ...) {
   s2::s2_equals_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_disjoint.s2_geography <- function(x, y, ...) {
+st_disjoint.s2_geography <- function(x, y, ...) {
   s2::s2_disjoint_matrix(x, y, ...)
 }
 
 
 #' @export
-sdf_touches.s2_geography <- function(x, y, ...) {
+st_touches.s2_geography <- function(x, y, ...) {
   s2::s2_touches_matrix(x, y, ...)
 }
 
@@ -90,26 +90,77 @@ sdf_touches.s2_geography <- function(x, y, ...) {
 # These are optional functions for the sdf interface.
 
 #' @export
-union_geometry.s2_geography <- function(x) {
+st_union.s2_geography <- function(x) {
   s2::s2_union_agg(x)
 }
 
 #' @export
-simplify_geometry.s2_geography <- function(x, tolerance,...) {
+st_simplify.s2_geography <- function(x, tolerance,...) {
   s2::s2_simplify(x, tolerance, ...)
 }
 
 #' @export
-buffer_geometry.s2_geography <- function(x, distance, ...) {
+st_buffer.s2_geography <- function(x, distance, ...) {
   s2::s2_buffer_cells(x, distance, ...)
 }
 
 #' @export
-centroid.s2_geography <- function(x) {
+st_centroid.s2_geography <- function(x) {
   s2::s2_centroid(x)
 }
 
 #' @export
-convex_hull.s2_geography <- function(x) {
+st_convex_hull.s2_geography <- function(x) {
   s2::s2_convex_hull(x)
+}
+
+# PostGIS operations s2 also has ------------------------------------------
+
+#' @export
+st_dwithin.s2_geography <- function(x, y, distance, ...) {
+  s2::s2_dwithin_matrix(x, y, distance, ...)
+}
+
+#' @export
+st_intersection.s2_geography <- function(x, y, ...) {
+  s2::s2_intersection(x, y, ...)
+}
+
+#' @export
+st_difference.s2_geography <- function(x, y, ...) {
+  s2::s2_difference(x, y, ...)
+}
+
+#' @export
+st_sym_difference.s2_geography <- function(x, y, ...) {
+  s2::s2_sym_difference(x, y, ...)
+}
+
+#' @export
+st_distance.s2_geography <- function(x, y, ...) s2::s2_distance(x, y, ...)
+
+#' @export
+st_perimeter.s2_geography <- function(x, ...) s2::s2_perimeter(x, ...)
+
+#' @export
+st_is_valid.s2_geography <- function(x, ...) s2::s2_is_valid(x, ...)
+
+#' @export
+st_is_empty.s2_geography <- function(x, ...) s2::s2_is_empty(x, ...)
+
+#' @export
+st_boundary.s2_geography <- function(x, ...) s2::s2_boundary(x, ...)
+
+#' @export
+st_num_points.s2_geography <- function(x, ...) s2::s2_num_points(x, ...)
+
+#' @export
+st_x.s2_geography <- function(x, ...) s2::s2_x(x, ...)
+
+#' @export
+st_y.s2_geography <- function(x, ...) s2::s2_y(x, ...)
+
+#' @export
+st_point_on_surface.s2_geography <- function(x, ...) {
+  s2::s2_point_on_surface(x, ...)
 }

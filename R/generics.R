@@ -11,24 +11,25 @@
 #' column of a spatial data frame.
 #'
 #' @details
-#' `is_geometry()` must return `TRUE` for the class. `bounding_box()` must
+#' `is_geometry()` must return `TRUE` for the class. `st_extent()` must
 #' return a numeric vector named `xmin`, `ymin`, `xmax`, `ymax` covering the
-#' whole vector. `combine_geometry()` must return the vector as a single
-#' geometry. The defaults use wk, so a class with a wk handler already has all
-#' three.
+#' whole vector. `st_collect()` must return the vector as a single geometry,
+#' following PostGIS `ST_Collect`: a `MULTI*` where the parts agree on a type
+#' and a `GEOMETRYCOLLECTION` where they do not. The defaults use wk, so a
+#' class with a wk handler already has all three.
 #'
 #' @param x a geometry vector.
 #' @returns
-#' `is_geometry()` a single logical. `bounding_box()` a named numeric vector of
-#' length 4. `combine_geometry()` a geometry vector of length 1.
+#' `is_geometry()` a single logical. `st_extent()` a named numeric vector of
+#' length 4. `st_collect()` a geometry vector of length 1.
 #' @examples
 #' if (requireNamespace("sf", quietly = TRUE)) {
 #'   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 #'   geometry <- sf::st_geometry(nc)
 #'
 #'   is_geometry(geometry)
-#'   bounding_box(geometry)
-#'   combine_geometry(geometry)
+#'   st_extent(geometry)
+#'   st_collect(geometry)
 #' }
 #' @export
 #' @rdname generics
@@ -41,19 +42,39 @@ is_geometry.default <- function(x) {
 
 #' @export
 #' @rdname generics
-bounding_box <- function(x) UseMethod("bounding_box")
+st_extent <- function(x) UseMethod("st_extent")
 
 #' @export
-bounding_box.default <- function(x) {
+st_extent.default <- function(x) {
   unlist(wk::wk_bbox(x))
 }
 
 #' @export
 #' @rdname generics
-combine_geometry <- function(x) UseMethod("combine_geometry")
+st_collect <- function(x) UseMethod("st_collect")
 
 #' @export
-combine_geometry.default <- function(x) wk::wk_collection(x)
+st_collect.default <- function(x) {
+  wk::wk_collection(wk::wk_flatten(x), geometry_type = collect_type(x))
+}
+
+# PostGIS collects into a Multi* when the parts agree on a type and into a
+# geometry collection when they do not. A point and a multipoint agree, both
+# collecting into a multipoint, and so on for lines and polygons. The parts are
+# flattened first: a multipolygon inside a multipolygon is not a geometry.
+collect_type <- function(x) {
+  types <- unique(wk::wk_meta(x)$geometry_type)
+  types <- types[!is.na(types)]
+
+  # point, linestring, polygon, multipoint, multilinestring, multipolygon
+  multi <- unique(c(4L, 5L, 6L, 4L, 5L, 6L)[types])
+
+  if (length(multi) == 1L && !is.na(multi)) {
+    multi
+  } else {
+    wk::wk_geometry_type("geometrycollection")
+  }
+}
 
 
 
@@ -69,38 +90,38 @@ combine_geometry.default <- function(x) wk::wk_collection(x)
 #' @param distance the buffer distance.
 #' @param concavity how tightly the hull follows the points.
 #' @param ... passed to the method.
-#' @returns A geometry vector. `union_geometry()` returns one of length 1.
+#' @returns A geometry vector. `st_union()` returns one of length 1.
 #' @examples
 #' if (requireNamespace("sf", quietly = TRUE)) {
 #'   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 #'   geometry <- sf::st_geometry(nc)
 #'
-#'   centroid(geometry)
-#'   convex_hull(geometry)
+#'   st_centroid(geometry)
+#'   st_convex_hull(geometry)
 #' }
 #' @export
 #' @rdname primary
-union_geometry <- function(x) UseMethod("union_geometry")
+st_union <- function(x) UseMethod("st_union")
 
 #' @export
 #' @rdname primary
-simplify_geometry <- function(x, ...) UseMethod("simplify_geometry")
+st_simplify <- function(x, ...) UseMethod("st_simplify")
 
 #' @export
 #' @rdname primary
-buffer_geometry <- function(x, distance, ...) UseMethod("buffer_geometry")
+st_buffer <- function(x, distance, ...) UseMethod("st_buffer")
 
 #' @export
 #' @rdname primary
-centroid <- function(x) UseMethod("centroid")
+st_centroid <- function(x) UseMethod("st_centroid")
 
 #' @export
 #' @rdname primary
-convex_hull <- function(x) UseMethod("convex_hull")
+st_convex_hull <- function(x) UseMethod("st_convex_hull")
 
 #' @export
 #' @rdname primary
-concave_hull <- function(x, concavity, ...) UseMethod("concave_hull")
+st_concave_hull <- function(x, concavity, ...) UseMethod("st_concave_hull")
 
 
 
@@ -119,15 +140,15 @@ concave_hull <- function(x, concavity, ...) UseMethod("concave_hull")
 #' if (requireNamespace("sf", quietly = TRUE)) {
 #'   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 #'
-#'   sdf_area(sf::st_geometry(nc))
+#'   st_area(sf::st_geometry(nc))
 #' }
 #' @export
 #' @rdname optional
-sdf_length <- function(x, ...) UseMethod("sdf_length")
+st_length <- function(x, ...) UseMethod("st_length")
 
 #' @export
 #' @rdname optional
-sdf_area <- function(x, ...) UseMethod("sdf_area")
+st_area <- function(x, ...) UseMethod("st_area")
 
 # possible others to implement:
 
